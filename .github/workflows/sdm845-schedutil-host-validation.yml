@@ -1,0 +1,29 @@
+name: SDM845 schedutil guarded policy (host tests)
+
+on:
+  push:
+    branches:
+      - feature/enchilada-sdm845-schedutil-hysteresis
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  policy-host-tests:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Vendor post-boot shell syntax
+        run: |
+          bash -n init/init.qcom.post_boot.sh
+      - name: Simulate SDM845 sysfs policies (not real hardware)
+        run: |
+          python3 tests/test_sdm845_schedutil.py init/init.qcom.post_boot.sh
+      - name: Verification boundary
+        run: |
+          echo "HOST PASS means syntactically valid vendor script and guarded rate-limit semantics."
+          echo "Not ROM-built, not flashed, no CPU/GPU performance improvement proven."
