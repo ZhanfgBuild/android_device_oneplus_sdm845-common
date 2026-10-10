@@ -5002,14 +5002,28 @@ case "$target" in
 
 	# configure governor settings for little cluster
 	echo "schedutil" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-	echo 0 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/rate_limit_us
+	# Match the upstream SDM845 WALT schedutil hysteresis: fast up, delayed down.
+	# Guard unsupported sysfs nodes; never override frequency/thermal limits.
+	if [ -w /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us ] && [ -w /sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us ]; then
+		echo 500 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us
+		echo 20000 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us
+	elif [ -w /sys/devices/system/cpu/cpu0/cpufreq/schedutil/rate_limit_us ]; then
+		echo 500 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/rate_limit_us
+	fi
 	echo 1228800 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/hispeed_freq
 	echo 1 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/pl
         echo 576000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
 
 	# configure governor settings for big cluster
 	echo "schedutil" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
-	echo 0 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/rate_limit_us
+	# Match the upstream SDM845 WALT schedutil hysteresis: fast up, delayed down.
+	# Guard unsupported sysfs nodes; never override frequency/thermal limits.
+	if [ -w /sys/devices/system/cpu/cpu4/cpufreq/schedutil/up_rate_limit_us ] && [ -w /sys/devices/system/cpu/cpu4/cpufreq/schedutil/down_rate_limit_us ]; then
+		echo 500 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/up_rate_limit_us
+		echo 20000 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/down_rate_limit_us
+	elif [ -w /sys/devices/system/cpu/cpu4/cpufreq/schedutil/rate_limit_us ]; then
+		echo 500 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/rate_limit_us
+	fi
 	echo 1536000 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/hispeed_freq
 	echo 1 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/pl
 	echo "0:1324800" > /sys/module/cpu_boost/parameters/input_boost_freq
